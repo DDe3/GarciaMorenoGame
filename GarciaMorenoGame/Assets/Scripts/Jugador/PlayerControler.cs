@@ -75,9 +75,13 @@ public class PlayerControler : MonoBehaviour
 
     private float rotationX = 0;
 
-    // Start is called before the first frame update
+
+
+    public static PlayerControler instance;
+    
     private void Awake()
     {
+        instance = this;
         playerCamera = GetComponentInChildren<Camera>();
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
