@@ -11,15 +11,17 @@ public class Door : Interactable
     [SerializeField] private float openDelay = 0.0f;
     [SerializeField] private AudioSource doorCloseAudioSource = null;
     [SerializeField] private float closeDelay = 0.0f;
-
     [SerializeField] private AudioSource doorShutAudioSource = null;
-    
-    
+
+
 
 
     private bool isOpen = false;
     private bool canBeInteractedWith = true;
     private Animator anim;
+
+    [Header("Configuracion de puerta")]
+    [SerializeField] private bool isClosed = true;
     [SerializeField] private Key.KeyType keyType;
 
 
@@ -29,18 +31,23 @@ public class Door : Interactable
         return keyType;
     }
 
-    private IEnumerator pauseDoorInteraction(float secs) {
+    private IEnumerator pauseDoorInteraction(float secs)
+    {
+        base.onLoseFocus();
         canBeInteractedWith = false;
         yield return new WaitForSeconds(secs);
         canBeInteractedWith = true;
     }
 
 
-    private IEnumerator automaticClose() {
-        
-        while (isOpen) {
+    private IEnumerator automaticClose()
+    {
+
+        while (isOpen)
+        {
             yield return new WaitForSeconds(3);
-            if (Vector3.Distance(transform.position, PlayerControler.instance.transform.position) > 10) {
+            if (Vector3.Distance(transform.position, PlayerControler.instance.transform.position) > 10)
+            {
                 isOpen = false;
                 doorCloseAudioSource.PlayDelayed(closeDelay);
                 anim.SetFloat("dot", 0);
@@ -60,31 +67,55 @@ public class Door : Interactable
         if (canBeInteractedWith)
         {
             StartCoroutine(pauseDoorInteraction(2.5f));
-            KeyHolder keyList = PlayerControler.instance.GetComponent<KeyHolder>();
-            if (keyList.containsKey(keyType))
+            if (isClosed)
             {
-                Vector3 doorTransformDirection = transform.TransformDirection(Vector3.back);
-                Vector3 playerTransformDirection = PlayerControler.instance.transform.position - transform.position;
-                float dot = Vector3.Dot(doorTransformDirection, playerTransformDirection);
-                if (isOpen)
+                KeyHolder keyList = PlayerControler.instance.GetComponent<KeyHolder>();
+                if (keyList.containsKey(keyType))
                 {
-                    doorCloseAudioSource.PlayDelayed(closeDelay);
-                    
+                    handleDoor();
+                    isClosed = false;
                 }
                 else
                 {
-                    doorOpenAudioSource.PlayDelayed(openDelay);
-
+                    doorShutAudioSource.Play();
                 }
-                isOpen = !isOpen;
-                anim.SetFloat("dot", dot);
-                anim.SetBool("isOpen", isOpen);
-                StartCoroutine(automaticClose());
-                
-            } else {
-                doorShutAudioSource.Play();
+
+
             }
+            else
+            {
+                handleDoor();
+            }
+
 
         }
     }
+
+    private void handleDoor()
+    {
+        
+        Vector3 doorTransformDirection = transform.TransformDirection(Vector3.up);
+        Vector3 playerTransformDirection = PlayerControler.instance.transform.position - gameObject.transform.position;
+        float dot = Vector3.Dot(playerTransformDirection, doorTransformDirection);
+        Debug.Log("Door forward: " +doorTransformDirection);
+        Debug.Log("Player vector: " +playerTransformDirection);
+        Debug.Log("Producto punto: " +dot);
+        if (isOpen)
+        {
+            doorCloseAudioSource.PlayDelayed(closeDelay);
+
+        }
+        else
+        {
+            doorOpenAudioSource.PlayDelayed(openDelay);
+
+        }
+        isOpen = !isOpen;
+        anim.SetFloat("dot", dot);
+        anim.SetBool("isOpen", isOpen);
+        StartCoroutine(automaticClose());
+    }
+
+
+
 }

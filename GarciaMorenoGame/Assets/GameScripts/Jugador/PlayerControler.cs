@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class PlayerControler : MonoBehaviour
 
 {
-    public bool CanMove { get; private set; } = true;
+    public bool CanMove { get; set; } = true;
     private bool isSprinting => canSprint && Input.GetKey(sprintKey);
     private bool shouldCrouch => Input.GetKeyDown(crouchKey) && !duringCrouchAnimation && characterController.isGrounded;
     private bool shouldJump => Input.GetKeyDown(jumpKey) && characterController.isGrounded && !isCrounching;
@@ -15,6 +16,7 @@ public class PlayerControler : MonoBehaviour
     [SerializeField] private bool canCrouch = true;
     [SerializeField] private bool canUseHeadBob = true;
     [SerializeField] private bool canInteract = true;
+    [SerializeField] private bool useFootSteps = true;
 
     [Header("Movimiento de camara")]
     [SerializeField] private float walkBobSpeed = 14f;
@@ -65,6 +67,19 @@ public class PlayerControler : MonoBehaviour
     private Interactable current;
 
 
+    [Header("Sonido de pasos")]
+    [SerializeField] private float baseSteepSpeed = 0.5f;
+    [SerializeField] private float crouchStepMultiplier = 1.5f;
+    [SerializeField] private float sprintStepMultiplier = 0.6f;
+
+    [SerializeField] private AudioSource footStepAudioSource = default;
+    [SerializeField] private AudioClip[] concreteClips = default;
+    [SerializeField] private AudioClip[] tierraClips = default;
+
+    private float footStepTimer = 0;
+    private float GetCurrentOffset => isCrounching ? baseSteepSpeed * crouchStepMultiplier : isSprinting ? baseSteepSpeed * sprintStepMultiplier : baseSteepSpeed;
+
+
 
     private Camera playerCamera;
     private CharacterController characterController;
@@ -78,7 +93,7 @@ public class PlayerControler : MonoBehaviour
 
 
     public static PlayerControler instance;
-    
+
     private void Awake()
     {
         instance = this;
@@ -114,6 +129,11 @@ public class PlayerControler : MonoBehaviour
                 HandleHeadBob();
             }
 
+            if (useFootSteps)
+            {
+                handleFootsteeps();
+            }
+
             if (canInteract)
             {
                 HandleInteractCheck();
@@ -126,6 +146,32 @@ public class PlayerControler : MonoBehaviour
 
 
 
+    }
+
+    private void handleFootsteeps()
+    {
+        if (!characterController.isGrounded) return;
+        if (currentInput == Vector2.zero) return;
+        footStepTimer -= Time.deltaTime;
+        if (footStepTimer <= 0)
+        {
+            if (Physics.Raycast(playerCamera.transform.position, Vector3.down, out RaycastHit hit, 3))
+            {
+                switch (hit.collider.tag)
+                {
+                    case "Piso/CONCRETO":
+                        footStepAudioSource.PlayOneShot(concreteClips[UnityEngine.Random.Range(0, concreteClips.Length - 1)]);
+                        break;
+                    case "Piso/TIERRA":
+                        footStepAudioSource.PlayOneShot(tierraClips[UnityEngine.Random.Range(0, tierraClips.Length - 1)]);
+                        break;
+                    default:
+                        footStepAudioSource.PlayOneShot(concreteClips[UnityEngine.Random.Range(0, concreteClips.Length - 1)]);
+                        break;
+                }
+            }
+            footStepTimer = GetCurrentOffset;
+        }
     }
 
     private void HandleMovementInput()
@@ -223,12 +269,12 @@ public class PlayerControler : MonoBehaviour
 
         if (Physics.Raycast(playerCamera.ViewportPointToRay(interactionRayPoint), out RaycastHit hit, interactionDistance, interactionLayer))
         {
-            if (hit.collider.gameObject.layer == 6 && (current == null || hit.collider.gameObject.GetInstanceID() != current.GetInstanceID())) 
+            if (hit.collider.gameObject.layer == 6 && (current == null || hit.collider.gameObject.GetInstanceID() != current.GetInstanceID()))
             {
                 hit.collider.TryGetComponent(out current);
-                if (current != null) {current.onFocus();}
-            
-                
+                if (current != null) { current.onFocus(); }
+
+
             }
         }
         else if (current)

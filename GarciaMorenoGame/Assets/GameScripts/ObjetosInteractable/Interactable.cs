@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class Interactable : MonoBehaviour
 {
 
+    [Header("Parametros de nombre")]
+    [SerializeField] public string nombre = "";
+    public Text textElement;
     private Outline outline;
     public virtual void Awake() {
         gameObject.layer = 6;
@@ -15,11 +19,15 @@ public abstract class Interactable : MonoBehaviour
     public abstract void onInteract();
     public void onFocus() {
         outline.enabled = true;
-        Debug.Log("Viendo a: "+ gameObject.name);
+        if (textElement!=null) {
+            textElement.text = nombre;
+        }
+    
     }
     public void onLoseFocus() {
         outline.enabled = false;
-        Debug.Log("Perdido de vista: "+ gameObject.name);
+        if (textElement!=null) {
+            textElement.text = "";
+        }
     }
-
 }

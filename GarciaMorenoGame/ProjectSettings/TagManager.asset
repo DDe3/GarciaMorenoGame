@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Door
+  - Note
+  - Piso/CONCRETO
+  - Piso/TIERRA
   layers:
   - Default
   - TransparentFX
