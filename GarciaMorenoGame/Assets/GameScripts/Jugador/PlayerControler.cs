@@ -46,6 +46,7 @@ public class PlayerControler : MonoBehaviour
     [Header("Parametros de Salto")]
     [SerializeField] private float jumpForce = 8.0f;
     [SerializeField] private float gravity = 30.0f;
+    private bool isInAir = false;
 
     [Header("Parametros de Movimiento")]
     [SerializeField] private float walkSpeed = 3.0f;
@@ -67,7 +68,7 @@ public class PlayerControler : MonoBehaviour
     private Interactable current;
 
 
-    [Header("Sonido de pasos")]
+    [Header("Sonidos")]
     [SerializeField] private float baseSteepSpeed = 0.5f;
     [SerializeField] private float crouchStepMultiplier = 1.5f;
     [SerializeField] private float sprintStepMultiplier = 0.6f;
@@ -75,6 +76,8 @@ public class PlayerControler : MonoBehaviour
     [SerializeField] private AudioSource footStepAudioSource = default;
     [SerializeField] private AudioClip[] concreteClips = default;
     [SerializeField] private AudioClip[] tierraClips = default;
+    [SerializeField] private AudioClip jumpClip = default;
+    [SerializeField] private AudioClip landClip = default;
 
     private float footStepTimer = 0;
     private float GetCurrentOffset => isCrounching ? baseSteepSpeed * crouchStepMultiplier : isSprinting ? baseSteepSpeed * sprintStepMultiplier : baseSteepSpeed;
@@ -197,6 +200,16 @@ public class PlayerControler : MonoBehaviour
             moveDirection.y -= gravity * Time.deltaTime;
         }
         characterController.Move(moveDirection * Time.deltaTime);
+        if (isInAir && characterController.isGrounded)
+        {
+            StartCoroutine(playSound());
+            isInAir = false;
+        }
+    }
+
+    private IEnumerator playSound() {
+        footStepAudioSource.PlayOneShot(landClip);
+        yield return null;
     }
 
 
@@ -244,7 +257,9 @@ public class PlayerControler : MonoBehaviour
     {
         if (shouldJump)
         {
+            footStepAudioSource.PlayOneShot(jumpClip);
             moveDirection.y = jumpForce;
+            isInAir = true;
         }
 
     }

@@ -5,6 +5,8 @@ using UnityEngine;
 public class Door : Interactable
 {
 
+    [Header("Texto HUD")]
+    [SerializeField] private string isClosedText = "Esta cerrada...";
 
     [Header("Sonido")]
     [SerializeField] private AudioSource doorOpenAudioSource = null;
@@ -23,7 +25,6 @@ public class Door : Interactable
     [Header("Configuracion de puerta")]
     [SerializeField] private bool isClosed = true;
     [SerializeField] private Key.KeyType keyType;
-
 
 
     public Key.KeyType getKeyType()
@@ -57,7 +58,6 @@ public class Door : Interactable
     }
 
 
-
     private void Start()
     {
         anim = GetComponent<Animator>();
@@ -77,10 +77,14 @@ public class Door : Interactable
                 }
                 else
                 {
+                    if (base.textComment != null)
+                    {
+                        StartCoroutine(base.handleFade(base.textComment));
+                        base.textComment.text = isClosedText;
+                    }
+
                     doorShutAudioSource.Play();
                 }
-
-
             }
             else
             {
@@ -91,15 +95,17 @@ public class Door : Interactable
         }
     }
 
+
+
+
+
+
     private void handleDoor()
     {
-        
+
         Vector3 doorTransformDirection = transform.TransformDirection(Vector3.up);
         Vector3 playerTransformDirection = PlayerControler.instance.transform.position - gameObject.transform.position;
         float dot = Vector3.Dot(playerTransformDirection, doorTransformDirection);
-        Debug.Log("Door forward: " +doorTransformDirection);
-        Debug.Log("Player vector: " +playerTransformDirection);
-        Debug.Log("Producto punto: " +dot);
         if (isOpen)
         {
             doorCloseAudioSource.PlayDelayed(closeDelay);

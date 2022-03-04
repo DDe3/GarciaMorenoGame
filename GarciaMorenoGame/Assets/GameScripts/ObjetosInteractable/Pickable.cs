@@ -11,7 +11,6 @@ public class Pickable : Interactable
 
     public override void onInteract()
     {
-        base.onLoseFocus();
         Key key = gameObject.GetComponent<Key>();
         if (key != null) {
             KeyHolder keyHolder = PlayerControler.instance.GetComponent<KeyHolder>();
@@ -24,6 +23,7 @@ public class Pickable : Interactable
     public IEnumerator destruir(Key key) {
         yield return new WaitUntil(() => !pickUpAudioSource.isPlaying );
         Destroy(key.gameObject);
+        base.textName.enabled = false;
     }
 
     
