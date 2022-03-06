@@ -8,6 +8,7 @@ TagManager:
   - Note
   - Piso/CONCRETO
   - Piso/TIERRA
+  - EnemyPatroll
   layers:
   - Default
   - TransparentFX
@@ -16,8 +17,8 @@ TagManager:
   - Water
   - UI
   - Interactable
-  - 
-  - 
+  - Jugador
+  - Escena
   - 
   - 
   - 

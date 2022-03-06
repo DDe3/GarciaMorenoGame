@@ -7,7 +7,7 @@ public class PlayerControler : MonoBehaviour
 {
     public bool CanMove { get; set; } = true;
     private bool isSprinting => canSprint && Input.GetKey(sprintKey);
-    private bool shouldCrouch => Input.GetKeyDown(crouchKey) && !duringCrouchAnimation && characterController.isGrounded;
+    private bool shouldCrouch => Input.GetKeyDown(crouchKey) && characterController.isGrounded;
     private bool shouldJump => Input.GetKeyDown(jumpKey) && characterController.isGrounded && !isCrounching;
 
     [Header("Opciones Funcionales")]
@@ -36,16 +36,14 @@ public class PlayerControler : MonoBehaviour
 
     [Header("Agacharse")]
     [SerializeField] private float crouchHeight = 0.5f;
-    [SerializeField] private float standingHeight = 2f;
-    [SerializeField] private float timeCrouch = 0.25f;
+    [SerializeField] private float standingHeight = 1.8f;
+    [SerializeField] private float timeCrouch = 0.05f;
     [SerializeField] private Vector3 crouchingCenter = new Vector3(0, 0.5f, 0);
     [SerializeField] private Vector3 standingCenter = new Vector3(0, 0, 0);
     private bool isCrounching;
-    private bool duringCrouchAnimation;
 
     [Header("Parametros de Salto")]
-    [SerializeField] private float jumpForce = 8.0f;
-    [SerializeField] private float gravity = 30.0f;
+    [SerializeField] private float gravity = 1f;
     private bool isInAir = false;
 
     [Header("Parametros de Movimiento")]
@@ -54,11 +52,11 @@ public class PlayerControler : MonoBehaviour
     [SerializeField] private float crouchSpeed = 1.5f;
 
 
-    [Header("Limites y Velocidad de camaraa")]
+    [Header("Limites y Velocidad de camara")]
     [SerializeField, Range(1, 10)] private float lookSpeedX = 2.0f;
     [SerializeField, Range(1, 10)] private float lookSpeedY = 2.0f;
     [SerializeField, Range(1, 100)] private float upperLookLimit = 80.0f;
-    [SerializeField, Range(1, 100)] private float lowerLookLimit = 80.0f;
+    [SerializeField, Range(1, 100)] private float lowerLookLimit = 30.0f;
 
 
     [Header("Interaccion con objetos")]
@@ -73,25 +71,30 @@ public class PlayerControler : MonoBehaviour
     [SerializeField] private float crouchStepMultiplier = 1.5f;
     [SerializeField] private float sprintStepMultiplier = 0.6f;
 
-    [SerializeField] private AudioSource footStepAudioSource = default;
+    [SerializeField] private AudioSource playerAudioSource = default;
     [SerializeField] private AudioClip[] concreteClips = default;
     [SerializeField] private AudioClip[] tierraClips = default;
-    [SerializeField] private AudioClip jumpClip = default;
-    [SerializeField] private AudioClip landClip = default;
-
+    [SerializeField] private AudioClip landingClip = default;
     private float footStepTimer = 0;
     private float GetCurrentOffset => isCrounching ? baseSteepSpeed * crouchStepMultiplier : isSprinting ? baseSteepSpeed * sprintStepMultiplier : baseSteepSpeed;
 
 
+    [Header("Animacion")]
+    [SerializeField] private Animator myAnimator = default;
+    [SerializeField] private GameObject modelo = default;
 
     private Camera playerCamera;
     private CharacterController characterController;
 
     private Vector3 moveDirection;
     private Vector2 currentInput;
+    
 
 
     private float rotationX = 0;
+
+    
+    private float velocity => isCrounching ? crouchSpeed : isSprinting ? sprintSpeed : walkSpeed;
 
 
 
@@ -115,11 +118,6 @@ public class PlayerControler : MonoBehaviour
         {
             HandleMovementInput();
             HandleMouseLook();
-
-            if (canJump)
-            {
-                HandleJump();
-            }
 
 
             if (canCrouch)
@@ -163,13 +161,13 @@ public class PlayerControler : MonoBehaviour
                 switch (hit.collider.tag)
                 {
                     case "Piso/CONCRETO":
-                        footStepAudioSource.PlayOneShot(concreteClips[UnityEngine.Random.Range(0, concreteClips.Length - 1)]);
+                        playerAudioSource.PlayOneShot(concreteClips[UnityEngine.Random.Range(0, concreteClips.Length - 1)]);
                         break;
                     case "Piso/TIERRA":
-                        footStepAudioSource.PlayOneShot(tierraClips[UnityEngine.Random.Range(0, tierraClips.Length - 1)]);
+                        playerAudioSource.PlayOneShot(tierraClips[UnityEngine.Random.Range(0, tierraClips.Length - 1)]);
                         break;
                     default:
-                        footStepAudioSource.PlayOneShot(concreteClips[UnityEngine.Random.Range(0, concreteClips.Length - 1)]);
+                        playerAudioSource.PlayOneShot(concreteClips[UnityEngine.Random.Range(0, concreteClips.Length - 1)]);
                         break;
                 }
             }
@@ -179,9 +177,11 @@ public class PlayerControler : MonoBehaviour
 
     private void HandleMovementInput()
     {
-        currentInput = new Vector2((isCrounching ? crouchSpeed : isSprinting ? sprintSpeed : walkSpeed) * Input.GetAxis("Vertical"), (isSprinting ? sprintSpeed : walkSpeed) * Input.GetAxis("Horizontal"));
+        
+        currentInput = new Vector2((velocity) * Input.GetAxis("Vertical"), (isSprinting ? sprintSpeed : walkSpeed) * Input.GetAxis("Horizontal"));
         float moveDirectionY = moveDirection.y;
         moveDirection = (transform.TransformDirection(Vector3.forward) * currentInput.x) + (transform.TransformDirection(Vector3.right) * currentInput.y);
+        myAnimator.SetFloat("velocity", moveDirection.magnitude);
         moveDirection.y = moveDirectionY;
     }
 
@@ -197,19 +197,17 @@ public class PlayerControler : MonoBehaviour
     {
         if (!characterController.isGrounded)
         {
+            isInAir = true;
+            myAnimator.SetBool("isInAir", isInAir);
             moveDirection.y -= gravity * Time.deltaTime;
         }
         characterController.Move(moveDirection * Time.deltaTime);
-        if (isInAir && characterController.isGrounded)
+        if (characterController.isGrounded && isInAir)
         {
-            StartCoroutine(playSound());
             isInAir = false;
+            playerAudioSource.PlayOneShot(landingClip);
+            myAnimator.SetBool("isInAir", isInAir);
         }
-    }
-
-    private IEnumerator playSound() {
-        footStepAudioSource.PlayOneShot(landClip);
-        yield return null;
     }
 
 
@@ -224,44 +222,26 @@ public class PlayerControler : MonoBehaviour
 
     private IEnumerator CrouchStand()
     {
-
-
+        //No se puede parar si algo esta 1 unidad encima del modelo 
         if (isCrounching && Physics.Raycast(playerCamera.transform.position, Vector3.up, 1f))
         {
             yield break;
         }
-
-        duringCrouchAnimation = true;
-
-        float timeElapsed = 0;
+        //Logica de agacharse
         float targetHeight = isCrounching ? standingHeight : crouchHeight;
         float currentHeight = characterController.height;
         Vector3 targetCenter = isCrounching ? standingCenter : crouchingCenter;
         Vector3 currentCenter = characterController.center;
-
-        while (timeElapsed < timeCrouch)
-        {
-            characterController.height = Mathf.Lerp(currentHeight, targetHeight, timeElapsed / timeCrouch);
-            characterController.center = Vector3.Lerp(currentCenter, targetCenter, timeElapsed / timeCrouch);
-            timeElapsed += Time.deltaTime;
-            yield return null;
-        }
+        
+        // Mover el modelo en Y lo que el Character Controller baja que es 0.94 (depende del modelo)
+        float up = isCrounching ? modelo.transform.position.y - 0.94f : modelo.transform.position.y + 0.94f;
+        Vector3 pos = new Vector3(characterController.transform.position.x, up ,characterController.transform.position.z);
+        modelo.transform.position = pos;
         characterController.height = targetHeight;
         characterController.center = targetCenter;
-
         isCrounching = !isCrounching;
-        duringCrouchAnimation = false;
-    }
-
-    private void HandleJump()
-    {
-        if (shouldJump)
-        {
-            footStepAudioSource.PlayOneShot(jumpClip);
-            moveDirection.y = jumpForce;
-            isInAir = true;
-        }
-
+        //Animacion
+        myAnimator.SetBool("isCrouching", isCrounching);
     }
 
     private void HandleHeadBob()
@@ -288,8 +268,6 @@ public class PlayerControler : MonoBehaviour
             {
                 hit.collider.TryGetComponent(out current);
                 if (current != null) { current.onFocus(); }
-
-
             }
         }
         else if (current)
