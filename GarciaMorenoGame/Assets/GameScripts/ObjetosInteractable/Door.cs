@@ -5,8 +5,6 @@ using UnityEngine;
 public class Door : Interactable
 {
 
-    [Header("Texto HUD")]
-    [SerializeField] private string isClosedText = "Esta cerrada...";
 
     [Header("Sonido")]
     [SerializeField] private AudioSource doorOpenAudioSource = null;
@@ -24,10 +22,10 @@ public class Door : Interactable
 
     [Header("Configuracion de puerta")]
     [SerializeField] private bool isClosed = true;
-    [SerializeField] private Key.KeyType keyType;
+    [SerializeField] private Pickable.KeyType keyType;
 
 
-    public Key.KeyType getKeyType()
+    public Pickable.KeyType getKeyType()
     {
         return keyType;
     }
@@ -69,8 +67,7 @@ public class Door : Interactable
             StartCoroutine(pauseDoorInteraction(2.5f));
             if (isClosed)
             {
-                KeyHolder keyList = PlayerControler.instance.GetComponent<KeyHolder>();
-                if (keyList.containsKey(keyType))
+                if (Inventory.instance.containsKey(keyType))
                 {
                     handleDoor();
                     isClosed = false;
@@ -80,7 +77,7 @@ public class Door : Interactable
                     if (base.textComment != null)
                     {
                         StartCoroutine(base.handleFade(base.textComment));
-                        base.textComment.text = isClosedText;
+                        base.textComment.text = comentario;
                     }
 
                     doorShutAudioSource.Play();

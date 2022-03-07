@@ -83,17 +83,20 @@ public class PlayerControler : MonoBehaviour
     [SerializeField] private Animator myAnimator = default;
     [SerializeField] private GameObject modelo = default;
 
+    [Header("UI")]
+    public GameObject inventoryUI;
+
     private Camera playerCamera;
     private CharacterController characterController;
 
     private Vector3 moveDirection;
     private Vector2 currentInput;
-    
+
 
 
     private float rotationX = 0;
 
-    
+
     private float velocity => isCrounching ? crouchSpeed : isSprinting ? sprintSpeed : walkSpeed;
 
 
@@ -108,14 +111,17 @@ public class PlayerControler : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         defaultYPos = playerCamera.transform.localPosition.y;
         Cursor.visible = false;
+        //inventoryUI.SetActive(!inventoryUI.activeSelf);
     }
 
     // Update is called once per frame
 
     void Update()
     {
+
         if (CanMove)
         {
+            HandleHud();
             HandleMovementInput();
             HandleMouseLook();
 
@@ -149,6 +155,26 @@ public class PlayerControler : MonoBehaviour
 
     }
 
+    private void HandleHud() {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            
+            bool invHud = !inventoryUI.activeSelf;
+            inventoryUI.SetActive(invHud);
+            if (invHud)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+
+        }
+    }
+
     private void handleFootsteeps()
     {
         if (!characterController.isGrounded) return;
@@ -177,7 +203,7 @@ public class PlayerControler : MonoBehaviour
 
     private void HandleMovementInput()
     {
-        
+
         currentInput = new Vector2((velocity) * Input.GetAxis("Vertical"), (isSprinting ? sprintSpeed : walkSpeed) * Input.GetAxis("Horizontal"));
         float moveDirectionY = moveDirection.y;
         moveDirection = (transform.TransformDirection(Vector3.forward) * currentInput.x) + (transform.TransformDirection(Vector3.right) * currentInput.y);
@@ -232,10 +258,10 @@ public class PlayerControler : MonoBehaviour
         float currentHeight = characterController.height;
         Vector3 targetCenter = isCrounching ? standingCenter : crouchingCenter;
         Vector3 currentCenter = characterController.center;
-        
+
         // Mover el modelo en Y lo que el Character Controller baja que es 0.94 (depende del modelo)
         float up = isCrounching ? modelo.transform.position.y - 0.94f : modelo.transform.position.y + 0.94f;
-        Vector3 pos = new Vector3(characterController.transform.position.x, up ,characterController.transform.position.z);
+        Vector3 pos = new Vector3(characterController.transform.position.x, up, characterController.transform.position.z);
         modelo.transform.position = pos;
         characterController.height = targetHeight;
         characterController.center = targetCenter;

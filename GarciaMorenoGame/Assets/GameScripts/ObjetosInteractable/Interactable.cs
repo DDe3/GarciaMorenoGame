@@ -6,10 +6,16 @@ using UnityEngine.UI;
 public abstract class Interactable : MonoBehaviour
 {
 
-    [Header("Parametros de nombre")]
+    [Header("Texto flotante de UI")]
+
+    // Variables para darle 
     public string nombre = "";
-    public Text textName = default;
-    public Text textComment = default;
+    public string descriptionEnInventario = "";
+    public string comentario = "";
+
+    // Text para interactuable
+    public Text textName = default;  // Texto donde va el nombre del objeto puede ser nulo
+    public Text textComment = default;  // Texto donde va el comentario que da el jugador sobre el objeto
     private Outline outline;
 
     public virtual void Awake()
@@ -37,7 +43,10 @@ public abstract class Interactable : MonoBehaviour
         outline.enabled = false;
         if (textName != null)
         {
-            StartCoroutine(FadeTextToZeroAlpha(0.2f, textName));
+            Debug.Log("VIENDO " +gameObject);
+            if (this.isActiveAndEnabled) {
+                StartCoroutine(FadeTextToZeroAlpha(0.2f, textName));
+            }
         }
     }
 
