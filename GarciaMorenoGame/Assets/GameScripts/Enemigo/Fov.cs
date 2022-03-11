@@ -6,8 +6,14 @@ using UnityEngine.AI;
 public class Fov : MonoBehaviour
 {
     public float radius;
-    [Range(0, 360)]
-    public float angle;
+    private float baseRadius;
+
+
+    [Header("Velocidad")]
+    [SerializeField] private float vPatrolling = 2.5f;
+    [SerializeField] private float vRun = 5f;
+    [Range(0, 360)] public float angle;
+    private float originalAngle;
     public GameObject playerRef;
     public LayerMask targetMask;
     public LayerMask obstructionMask;
@@ -19,11 +25,20 @@ public class Fov : MonoBehaviour
     private int currentPoint;
     private float distanceToPatrollObjective = 1f;
     private bool seen = false;
+    private Animator myAnimator = default;
+
+    [Header("Sonidos")]
+    [SerializeField] private AudioSource audioSource = default;
+    [SerializeField] private AudioClip walkingClip = default;
+    [SerializeField] private AudioClip runningClip = default;
 
 
     private void Start()
     {
+        originalAngle = angle;
+        baseRadius = radius;
         agent = GetComponent<NavMeshAgent>();
+        myAnimator = GetComponent<Animator>();
         playerRef = GameObject.FindGameObjectWithTag("Player");
         currentPoint = Random.Range(0, destinations.Length);
         StartCoroutine(fovRoutine());
@@ -34,10 +49,22 @@ public class Fov : MonoBehaviour
     {
         if (canSeePlayer && target != null)
         {
+            myAnimator.SetBool("canSeePlayer", true);
+            agent.speed = vRun;
+            angle = 360f;
+            radius = 20;
             agent.SetDestination(target.position);
         }
         else
         {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.PlayOneShot(walkingClip);
+            }
+            myAnimator.SetBool("canSeePlayer", false);
+            angle = originalAngle;
+            agent.speed = vPatrolling;
+            radius = baseRadius;
             seen = false;
             backToPatroll();
         }
@@ -91,11 +118,13 @@ public class Fov : MonoBehaviour
                 if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask))
                 {
                     //Le vio al jugador que hace?
-                    if (seen==false)
+                    if (seen == false)
                     {
+                        seen = true;
+                        canSeePlayer = true;
                         StartCoroutine(playerSeenActions());
                     }
-                    canSeePlayer = true;
+                    // canSeePlayer = true;
                 }
                 else
                 {
@@ -116,17 +145,19 @@ public class Fov : MonoBehaviour
 
     private IEnumerator playerSeenActions()
     {
-        seen = true;
         transform.LookAt(target);
+        audioSource.Stop();
         Debug.Log("Te vi");
-        //playAnimation
-        //playSound
+        myAnimator.SetBool("seen", true);
         agent.isStopped = true;
         yield return new WaitForSeconds(1f);
         Debug.Log("Te sigo ahora");
         agent.isStopped = false;
+        myAnimator.SetBool("seen", false);
         if (target != null)
         {
+            audioSource.PlayOneShot(runningClip);
+            audioSource.PlayOneShot(walkingClip);
             agent.SetDestination(target.position);
         }
     }

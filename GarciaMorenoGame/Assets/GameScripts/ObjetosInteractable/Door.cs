@@ -21,7 +21,7 @@ public class Door : Interactable
     private Animator anim;
 
     [Header("Configuracion de puerta")]
-    [SerializeField] private bool isClosed = true;
+    [SerializeField] public bool isClosed = true;
     [SerializeField] private Pickable.KeyType keyType;
 
 
@@ -36,6 +36,7 @@ public class Door : Interactable
         canBeInteractedWith = false;
         yield return new WaitForSeconds(secs);
         canBeInteractedWith = true;
+        anim.SetBool("isClosed", false);
     }
 
 
@@ -74,12 +75,12 @@ public class Door : Interactable
                 }
                 else
                 {
+                    anim.SetBool("isClosed", true);
                     if (base.textComment != null)
                     {
                         StartCoroutine(base.handleFade(base.textComment));
                         base.textComment.text = comentario;
                     }
-
                     doorShutAudioSource.Play();
                 }
             }

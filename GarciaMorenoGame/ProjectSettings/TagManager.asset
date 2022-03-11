@@ -9,6 +9,8 @@ TagManager:
   - Piso/CONCRETO
   - Piso/TIERRA
   - EnemyPatroll
+  - CodeInput
+  - Keypad
   layers:
   - Default
   - TransparentFX
