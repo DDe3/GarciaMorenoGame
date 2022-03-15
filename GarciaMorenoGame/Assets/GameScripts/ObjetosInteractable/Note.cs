@@ -7,16 +7,20 @@ public class Note : Interactable
 {
     public Image noteImage;
     public Button closeBtn;
+    public Text text;
     public AudioClip pickUpSound;
     public AudioClip putAwaySound;
+    [TextArea] public string textoNota;
 
     void Start()
     {
         enableUI(false);
         closeBtn.onClick.AddListener(hideNoteImage);
+        text.text = textoNota;
     }
 
     private void enableUI(bool setBool) {
+        text.enabled = setBool;
         noteImage.enabled = setBool;
         closeBtn.gameObject.SetActive(setBool);
     }
