@@ -114,8 +114,13 @@ public class PlayerControler : MonoBehaviour
         //inventoryUI.SetActive(!inventoryUI.activeSelf);
     }
 
-    // Update is called once per frame
-
+    void Start() {
+        if (PlayerPrefs.HasKey("volumen")) {
+            AudioListener.volume = PlayerPrefs.GetFloat("volumen");
+        } 
+        
+        
+    }
     void Update()
     {
 
@@ -260,7 +265,7 @@ public class PlayerControler : MonoBehaviour
         Vector3 currentCenter = characterController.center;
 
         // Mover el modelo en Y lo que el Character Controller baja que es 0.94 (depende del modelo)
-        float up = isCrounching ? modelo.transform.position.y - 0.94f : modelo.transform.position.y + 0.94f;
+        float up = isCrounching ? modelo.transform.position.y - 1f : modelo.transform.position.y + 1f;
         Vector3 pos = new Vector3(characterController.transform.position.x, up, characterController.transform.position.z);
         modelo.transform.position = pos;
         characterController.height = targetHeight;

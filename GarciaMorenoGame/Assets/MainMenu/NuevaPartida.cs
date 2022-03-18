@@ -11,6 +11,8 @@ public class NuevaPartida : MonoBehaviour
         index = SceneManager.GetActiveScene().buildIndex;
     }
     public void playGame() {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         StartCoroutine(loadScene());
     }
 
@@ -21,7 +23,7 @@ public class NuevaPartida : MonoBehaviour
 
 
     IEnumerator loadScene() {
-         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(index+1);
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(index+1);
 
         while (!asyncLoad.isDone)
         {

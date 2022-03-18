@@ -1189,7 +1189,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2227633988529199474}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 6.5157604, y: 0.956, z: -50.51007}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -1209,12 +1209,12 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 2
   m_Height: 1.8
-  m_Radius: 0.49
+  m_Radius: 0.34
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0.1, y: 0, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2227633988529199475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1278,6 +1278,7 @@ MonoBehaviour:
   landingClip: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   myAnimator: {fileID: 7207585369451901514}
   modelo: {fileID: 4156119648514224778}
+  inventoryUI: {fileID: 0}
 --- !u!114 &2227633988529199478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1290,6 +1291,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d1c6d6afe1bea44dbfdefaca0b12289, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  items: []
+  space: 9
 --- !u!82 &2227633988529199479
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2161,7 +2164,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 1beeff487db89bf4094bd77f0759d009, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
