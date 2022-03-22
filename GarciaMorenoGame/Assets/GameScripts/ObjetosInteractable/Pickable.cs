@@ -16,7 +16,8 @@ public class Pickable : Interactable
 
     public enum KeyType  // Poner aqui todos los tipos de llave que hay
     {
-        Test
+        Test,
+        Departamento
     }
 
     public KeyType GetKeyType()
