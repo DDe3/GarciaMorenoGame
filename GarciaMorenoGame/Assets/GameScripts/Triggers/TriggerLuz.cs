@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class TriggerLuz : MonoBehaviour
 {
-    private Light luz = default;
-    private AudioSource sonido;
+    public Light luz = default;
+    public AudioSource sonido;
 
 
     public float minTime, maxTime, timer;
@@ -13,14 +13,14 @@ public class TriggerLuz : MonoBehaviour
 
     private void Start()
     {
-        luz = GetComponentInParent<Light>();
-        sonido = GetComponentInParent<AudioSource>();
         timer = Random.Range(minTime, maxTime);
     }
 
     private void OnTriggerStay(Collider other)
     {
-        flicker();
+        if (other.tag == "Player") {
+            flicker();
+        }
     }
 
     void flicker()

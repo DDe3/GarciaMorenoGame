@@ -23,6 +23,7 @@ public class InventorySlot : MonoBehaviour
 
     public void clickItem()
     {
+        Debug.Log("Clicked");
         clearDescription();
         if (item!=null) 
         {

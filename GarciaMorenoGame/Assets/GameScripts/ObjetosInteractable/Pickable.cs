@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Pickable : Interactable
+public abstract class Pickable : Interactable
 {
 
     [Header("Dibujo")]
@@ -17,7 +17,8 @@ public class Pickable : Interactable
     public enum KeyType  // Poner aqui todos los tipos de llave que hay
     {
         Test,
-        Departamento
+        Departamento,
+        Linterna
     }
 
     public KeyType GetKeyType()
@@ -31,6 +32,7 @@ public class Pickable : Interactable
         if (wasPickedUp)
         {
             pickUpAudioSource.PlayOneShot(pickUpSound);
+            doSomethingElse();
             StartCoroutine(destruir());
         }
         else
@@ -47,6 +49,8 @@ public class Pickable : Interactable
         gameObject.SetActive(false);
         
     }
+
+    public abstract void doSomethingElse();
 
 
 }

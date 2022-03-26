@@ -16,6 +16,7 @@ public class Flashlight : MonoBehaviour
     public bool on;
     public bool off;
 
+    public bool canUseFlashlihgt;
 
 
 
@@ -23,29 +24,34 @@ public class Flashlight : MonoBehaviour
     {
         off = true;
         flashlight.SetActive(false);
+        canUseFlashlihgt = false;
     }
 
 
+    public void activateFlashlight()
+    {
+        canUseFlashlihgt = true;
+    }
 
 
     void Update()
     {
-        if(off && Input.GetKeyDown(turnOnOffKey))
+        if (canUseFlashlihgt)
         {
-            flashlight.SetActive(true);
-            flashlightAudioSource.PlayOneShot(turnOnClip);
-            off = false;
-            on = true;
+            if (off && Input.GetKeyDown(turnOnOffKey))
+            {
+                flashlight.SetActive(true);
+                flashlightAudioSource.PlayOneShot(turnOnClip);
+                off = false;
+                on = true;
+            }
+            else if (on && Input.GetKeyDown(turnOnOffKey))
+            {
+                flashlight.SetActive(false);
+                flashlightAudioSource.PlayOneShot(turnOffClip);
+                off = true;
+                on = false;
+            }
         }
-        else if (on && Input.GetKeyDown(turnOnOffKey))
-        {
-            flashlight.SetActive(false);
-            flashlightAudioSource.PlayOneShot(turnOffClip);
-            off = true;
-            on = false;
-        }
-
-
-
     }
 }
